@@ -1,0 +1,1415 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Genç Sigorta Eksperlik - Parça ve İşçilik Özeti V17</title>
+<style>
+:root{--navy:#102f57;--navy2:#173f70;--bg:#eef2f6;--line:#cbd5e1;--text:#172334;--muted:#64748b;--green:#047857;--red:#991b1b;--blue:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:0;z-index:20}
+header h1{margin:0;font-size:19px}.sub{font-size:12px;opacity:.85;margin-top:3px}
+.wrap{max-width:1580px;margin:auto;padding:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px}
+.card h2,.card h3{margin:0 0 9px}
+.note{background:#fff7ed;border:1px solid #fdba74;border-radius:9px;padding:9px 11px;font-size:12px;margin-bottom:10px}
+button{border:0;border-radius:8px;padding:8px 11px;font-weight:800;cursor:pointer;background:var(--navy);color:#fff}
+button.soft{background:#e2e8f0;color:var(--navy)}button.danger{background:var(--red)}
+.mainTabs,.subTabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.mainTabs button{background:#475569}.mainTabs button.active{background:var(--green)}
+.subTabs button{background:#64748b}.subTabs button.active{background:var(--blue)}
+.breadcrumb{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:7px 9px;font-size:12px;font-weight:800;margin-bottom:8px}
+.part-picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:7px}
+.part-choice{border:1px solid #cbd5e1;border-radius:9px;padding:8px 9px;background:#f8fafc;display:flex;align-items:flex-start;gap:7px;min-height:44px;cursor:pointer;font-size:12px;font-weight:700;line-height:1.2}
+.part-choice:hover{border-color:#60a5fa;background:#eff6ff}.part-choice.selected{background:#dbeafe;border-color:#2563eb;color:#102f57}
+.part-choice input{width:17px;height:17px;flex:0 0 auto;margin:0}
+.addPartRow{display:grid;grid-template-columns:minmax(250px,1fr) auto;gap:7px;margin-top:10px;padding-top:10px;border-top:1px dashed #cbd5e1}
+.addPartRow input{width:100%;border:1px solid #b7c5d7;border-radius:8px;padding:8px;font-size:12px}
+.counter{font-size:12px;font-weight:800;color:var(--navy);margin-left:auto}
+.scroll{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:1060px}
+th,td{border:1px solid #cbd5e1;padding:5px;vertical-align:middle}
+th{background:#dfe7f1;text-align:left;font-size:11.5px}
+td select,td input[type=text]{width:100%;border:1px solid #b7c5d7;border-radius:7px;padding:6px;font-size:11px;background:#fff}
+.checkcell{text-align:center;white-space:nowrap}.checkcell label{display:inline-flex;align-items:center;gap:4px;font-weight:700}.checkcell input{width:17px;height:17px}
+.pieceName{font-weight:800;min-width:190px}
+.col-parttype{width:150px}.col-st{width:92px}.col-change{width:82px}.col-repair{width:105px}.col-paint{width:105px}.col-control{width:82px}.col-mo{width:92px}.col-note{min-width:145px}.col-del{width:48px}
+/* İşlem durumu: işlem görmeyen satır uyarı verir, işlem yapılan satır ve aktif işlem hücreleri belirginleşir */
+tr.pending-row td{background:#fffaf0}
+tr.processed-row td{background:#f0fdf4}
+tr.processed-row td.pieceName{background:#dcfce7;color:#14532d}
+td.active-op{background:#bbf7d0 !important;color:#14532d;font-weight:900}
+td.active-op select{border-color:#16a34a;background:#f0fdf4;font-weight:800}
+td.active-op input[type=checkbox]{accent-color:#16a34a}
+tr.pending-row td.pieceName::after{content:' • İŞLEM BEKLİYOR';display:block;margin-top:3px;font-size:9px;font-weight:900;color:#b45309;letter-spacing:.2px}
+/* İşçilik durumu: üst işlem tablosundan farklı olarak mor/lila tonları kullanılır */
+tr.labor-pending-row td{background:#faf5ff}
+tr.labor-done-row td{background:#f5f3ff}
+tr.labor-done-row td.pieceName{background:#ede9fe;color:#5b21b6}
+td.active-labor{background:#ddd6fe !important;color:#4c1d95;font-weight:900}
+td.active-labor input[type=text]{border-color:#7c3aed;background:#f5f3ff;font-weight:800;color:#4c1d95}
+tr.labor-pending-row td.pieceName::after{content:' • İŞÇİLİK BEKLİYOR';display:block;margin-top:3px;font-size:9px;font-weight:900;color:#7e22ce;letter-spacing:.2px}
+tr.bulk-labor-done td{background:#f5f3ff}
+tr.bulk-labor-done td:first-child{font-weight:900;color:#5b21b6}
+tr.bulk-labor-done td:last-child{background:#ddd6fe}
+.laborTabs{display:flex;gap:7px;margin:5px 0 9px}.laborTabs button{background:#e2e8f0;color:#334155}.laborTabs button.active{background:var(--navy);color:#fff}
+.small{font-size:11px;color:var(--muted)}
+.laborSummary{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:9px}
+.sum{background:#f8fafc;border:1px solid #dbe3ec;border-radius:8px;padding:7px;text-align:center;font-size:10px}.sum b{display:block;color:var(--navy);font-size:13px;margin-top:3px}
+.total{font-size:17px;font-weight:900;text-align:right;color:var(--navy);margin-top:8px}
+.addBelow{display:flex;justify-content:flex-start;gap:7px;margin-top:9px}.addBelow button{background:#334155}.addBelow button:hover{background:#1e293b}
+.extraNameInput{width:100%;border:1px solid #b7c5d7;border-radius:7px;padding:6px;font-size:11px;background:#fff}
+.inlineAddForm{display:none;grid-template-columns:minmax(260px,1fr) auto auto;gap:7px;align-items:center;margin-top:8px;padding:9px;border:1px dashed #94a3b8;border-radius:9px;background:#f8fafc}.inlineAddForm.show{display:grid}.inlineAddForm input{width:100%;border:1px solid #b7c5d7;border-radius:8px;padding:9px;font-size:12px;background:#fff}.inlineAddForm .cancel{background:#e2e8f0;color:#334155}@media(max-width:650px){.inlineAddForm{grid-template-columns:1fr 1fr}.inlineAddForm input{grid-column:1/-1}}
+@media(max-width:850px){.part-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.laborSummary{grid-template-columns:repeat(2,1fr)}.mainTabs,.subTabs{display:grid;grid-template-columns:repeat(2,1fr)}}
+
+/* ===== V14 - BAŞLIK / DİĞER BÖLÜM / BASKI ===== */
+.headerMain{width:100%;display:flex;flex-direction:column;gap:10px}
+.headerTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.headerTopText h1{margin:0;font-size:21px;letter-spacing:.15px}
+.headerTopText .sub{display:none}
+.headerInfo{
+ display:grid;
+ grid-template-columns:1fr 1fr 1fr;
+ gap:24px;
+ align-items:end;
+}
+.hInfo{min-width:0}
+.hInfo label{
+ display:block;
+ margin-bottom:3px;
+ font-size:10.5px;
+ font-weight:900;
+ letter-spacing:.65px;
+ text-transform:uppercase;
+}
+.hInfo input{
+ width:100%;
+ border:0;
+ border-bottom:2px solid currentColor;
+ border-radius:0;
+ background:transparent;
+ color:inherit;
+ padding:3px 2px 6px;
+ font-size:16px;
+ font-weight:900;
+ outline:none;
+ letter-spacing:.2px;
+}
+.hInfo.blue{color:#60a5fa}
+.hInfo.red{color:#ff6b6b;text-align:center}
+.hInfo.red input{
+ text-align:center;
+ text-transform:uppercase;
+ font-size:18px;
+ letter-spacing:.7px;
+}
+.hInfo.right{text-align:right}
+.hInfo.right input{text-align:right}
+
+.headerActions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.headerActions button{
+ background:#e2e8f0;
+ color:#16375f;
+ border:1px solid rgba(255,255,255,.35);
+}
+.headerActions .shareBtn{background:#dbeafe}
+
+/* Sadece DİĞER bölümüne ait manuel 10 satırlık tablo */
+#otherDirectWrap{display:none;margin-top:8px}
+#otherDirectWrap.show{display:block}
+#otherDirectTable{min-width:1060px}
+#otherDirectTable input[type=text],
+#otherDirectTable select{
+ width:100%;
+ border:1px solid #b7c5d7;
+ border-radius:7px;
+ padding:6px;
+ font-size:11px;
+ background:#fff;
+}
+#otherDirectTable .otherPartName{font-weight:800}
+.otherDirectAdd{display:flex;justify-content:flex-start;margin-top:9px}
+.otherDirectAdd button{background:#334155}
+
+/* Baskıda renge güvenmeyen başlık */
+@media print{
+ @page{size:A4 landscape;margin:9mm}
+ body{background:#fff;color:#000}
+ header{
+  position:static;
+  background:#fff!important;
+  color:#000!important;
+  padding:0 0 10px!important;
+  border-bottom:2px solid #000;
+ }
+ .headerTopText h1{
+  color:#000!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  letter-spacing:.2px!important;
+ }
+ .headerInfo{
+  grid-template-columns:1fr 1fr 1fr!important;
+  gap:18px!important;
+ }
+ .hInfo,.hInfo.blue,.hInfo.red,.hInfo.right{
+  color:#000!important;
+  text-align:left!important;
+ }
+ .hInfo label{
+  color:#000!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:.7px!important;
+ }
+ .hInfo input,
+ .hInfo.red input,
+ .hInfo.right input{
+  color:#000!important;
+  text-align:left!important;
+  border-bottom:1.5px solid #000!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  letter-spacing:.15px!important;
+ }
+ .hInfo.red input{
+  text-align:center!important;
+  border:1.8px solid #000!important;
+  padding:5px 7px!important;
+  font-size:15px!important;
+  letter-spacing:.8px!important;
+ }
+ .hInfo.red{text-align:center!important}
+ .headerActions,#cleanBtn{display:none!important}
+ .wrap{max-width:none;padding:0}
+ .card{border:0;border-radius:0;padding:0;margin-bottom:10px}
+ .scroll{overflow:visible}
+ table{min-width:0;font-size:9px}
+ th{font-size:9px;background:#eee!important;color:#000!important}
+ th,td{padding:4px}
+ button.danger,.col-del{display:none!important}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:900px){
+ header{position:static}
+ .headerInfo{grid-template-columns:1fr}
+ .hInfo.red,.hInfo.right{text-align:left}
+ .hInfo.red input,.hInfo.right input{text-align:left}
+}
+
+
+/* ===== V15 BAŞLIK TASARIMI ===== */
+.headerTop{
+  display:block;
+  text-align:center;
+  position:relative;
+}
+.headerTopText{
+  width:100%;
+  text-align:center;
+}
+.headerTopText h1{
+  margin:0;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:.6px;
+  color:#0f3768;
+}
+.reportTitle{
+  margin-top:2px;
+  font-size:17px;
+  font-weight:900;
+  color:#2563eb;
+  letter-spacing:.35px;
+}
+#cleanBtn{
+  position:absolute;
+  right:0;
+  top:0;
+}
+.headerInfo{
+  margin-top:8px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:24px;
+  align-items:end;
+}
+.hInfo label{
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.hInfo.blue{
+  color:#2563eb;
+}
+.hInfo.red{
+  color:#dc2626;
+  text-align:center;
+}
+.hInfo.red input{
+  text-align:center;
+  font-size:18px;
+  font-weight:900;
+}
+.hInfo.right{
+  color:#2563eb;
+  text-align:right;
+}
+.hInfo.right input{
+  text-align:right;
+}
+.hInfo input{
+  background:#fff;
+  color:inherit;
+  font-weight:900;
+}
+header{
+  background:#fff !important;
+  color:#172334 !important;
+  border-bottom:2px solid #0f3768;
+}
+.headerActions button{
+  background:#eef3f8;
+  color:#0f3768;
+  border:1px solid #cbd5e1;
+}
+.headerActions .shareBtn{
+  background:#eef3f8;
+  color:#0f3768;
+}
+
+/* Baskıda da aynı hiyerarşiyi koru; renkli baskıda renkler, siyah-beyazda ton farkı */
+@media print{
+  header{
+    background:#fff!important;
+    color:#000!important;
+    border-bottom:2px solid #000!important;
+  }
+  .headerTopText h1{
+    font-family:Georgia,"Times New Roman",serif!important;
+    font-size:20px!important;
+    font-weight:900!important;
+    text-align:center!important;
+    color:#0f3768!important;
+  }
+  .reportTitle{
+    text-align:center!important;
+    font-size:15px!important;
+    font-weight:900!important;
+    color:#2563eb!important;
+  }
+  .headerInfo{
+    grid-template-columns:1fr 1fr 1fr!important;
+    gap:18px!important;
+  }
+  .hInfo.blue,
+  .hInfo.right{
+    color:#2563eb!important;
+  }
+  .hInfo.red{
+    color:#dc2626!important;
+  }
+  .hInfo label{
+    font-size:9px!important;
+    font-weight:900!important;
+  }
+  .hInfo input{
+    font-size:13px!important;
+    font-weight:900!important;
+    border-bottom:1.5px solid currentColor!important;
+    background:#fff!important;
+  }
+  .hInfo.red input{
+    font-size:15px!important;
+    text-align:center!important;
+    border:1.8px solid #dc2626!important;
+  }
+}
+
+
+/* ===== V16: RAPOR ÖNİZLEME + PDF RAPOR TASARIMI ===== */
+#reportModal{
+ display:none; position:fixed; inset:0; z-index:9999;
+ background:rgba(15,23,42,.82); overflow:auto; padding:18px;
+}
+#reportModal.show{display:block}
+.reportModalToolbar{
+ max-width:1180px; margin:0 auto 10px; display:flex; gap:8px;
+ justify-content:flex-end; flex-wrap:wrap;
+}
+.reportModalToolbar button{background:#173f70}
+.reportModalToolbar .closeReport{background:#64748b}
+.reportSheet{
+ width:1120px; min-height:792px; margin:0 auto; background:#fff;
+ color:#172033; box-shadow:0 10px 35px rgba(0,0,0,.35);
+ padding:10px 12px 8px; font-family:Arial,Helvetica,sans-serif;
+}
+.rptBanner{
+ background:#173f70; color:#fff; text-align:center;
+ border:2px solid #12355f; padding:13px 10px 11px;
+}
+.rptCompany{font-size:28px;line-height:1;font-weight:900;letter-spacing:.6px}
+.rptSubtitle{font-size:16px;font-weight:900;margin-top:7px;letter-spacing:.35px}
+.rptInfo{
+ display:grid; grid-template-columns:1fr 1fr 1fr;
+ border:2px solid #173f70; border-top:0;
+}
+.rptInfoBox{
+ min-height:70px; padding:10px 14px 8px; background:#f7f8fb;
+ border-right:1px solid #8a98aa;
+}
+.rptInfoBox:last-child{border-right:0}
+.rptInfoLabel{font-size:11px;font-weight:900;color:#526176;letter-spacing:.45px}
+.rptInfoValue{
+ margin-top:13px; border-bottom:1px solid #9eabb9;
+ padding:0 0 6px; font-size:17px; font-weight:900; color:#173f70;
+}
+.rptInfoBox.plate{text-align:center}
+.rptInfoBox.plate .rptInfoValue{color:#c62828;font-size:20px}
+.rptSectionTitle{
+ margin-top:10px; background:#173f70; color:#fff; padding:7px 10px;
+ font-size:15px; font-weight:900; letter-spacing:.25px;
+}
+.rptTable{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}
+.rptTable th,.rptTable td{border:1px solid #758397;padding:6px 7px;vertical-align:top}
+.rptTable th{background:#e7ebf1;text-align:center;font-weight:900}
+.rptSummaryTable td{height:92px}
+.rptSummaryTable td.change{background:#f1f5fb}
+.rptSummaryTable td.repair{background:#eef8f0}
+.rptSummaryTable td.st{background:#f4f5f7}
+.rptSummaryTable td.paint{background:#fff2e8}
+.rptSummaryTable td.center{text-align:center}
+.rptLaborTable td{vertical-align:middle}
+.rptLaborTable td.num{text-align:center;white-space:nowrap}
+.rptLaborTable td.totalCell{font-weight:900;color:#173f70}
+.rptEmpty{color:#64748b;text-align:center;font-style:italic}
+.rptTotals{
+ display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px
+}
+.rptTotalBox{
+ border:1px solid #7a8797;background:#f5f6f8;min-height:51px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ text-align:center;padding:5px
+}
+.rptTotalBox.general{background:#edf3f9;border:2px solid #173f70}
+.rptTotalLabel{font-size:11px;font-weight:900}
+.rptTotalValue{font-size:15px;font-weight:900;color:#173f70;margin-top:4px}
+.rptFooter{
+ display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+ margin-top:10px;padding-top:7px;border-top:1px solid #aab3bf;
+ font-size:9px;color:#334155
+}
+.rptFooter div:nth-child(2){text-align:center}
+.rptFooter div:nth-child(3){text-align:right}
+
+body.report-printing > header,
+body.report-printing > .wrap{display:none!important}
+body.report-printing #reportModal{
+ display:block!important;position:static!important;inset:auto!important;
+ padding:0!important;background:#fff!important;overflow:visible!important
+}
+body.report-printing .reportModalToolbar{display:none!important}
+body.report-printing .reportSheet{
+ width:auto!important;min-height:0!important;margin:0!important;padding:0!important;
+ box-shadow:none!important
+}
+@media print{
+ @page{size:A4 landscape;margin:7mm}
+ body.report-printing{background:#fff!important}
+ body.report-printing #reportModal{display:block!important}
+ body.report-printing .rptBanner{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body.report-printing .rptSectionTitle{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body.report-printing .rptTable th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body.report-printing .rptSummaryTable td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body.report-printing .rptTotalBox{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:1180px){
+ .reportSheet{transform-origin:top left}
+}
+/* ===== V17 KAYIT / YENİ DOSYA ===== */
+.savedModal{display:none;position:fixed;inset:0;z-index:10020;background:rgba(15,23,42,.76);padding:24px;overflow:auto}
+.savedModal.show{display:block}
+.savedBox{max-width:900px;margin:30px auto;background:#fff;border-radius:12px;border:1px solid #cbd5e1;box-shadow:0 16px 45px rgba(0,0,0,.3);overflow:hidden}
+.savedHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:#173f70;color:#fff}
+.savedHead h3{margin:0;font-size:16px}
+.savedBody{padding:12px}
+.savedTable{min-width:0!important;width:100%;font-size:12px}
+.savedTable th,.savedTable td{padding:8px}
+.savedEmpty{padding:20px;text-align:center;color:#64748b;font-weight:700}
+.savedActions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.savedActions .openBtn{background:#173f70}
+.savedActions .delBtn{background:#991b1b}
+.saveStatus{font-size:11px;font-weight:800;color:#047857;align-self:center}
+@media(max-width:700px){.savedModal{padding:8px}.savedBox{margin:10px auto}.savedTable{font-size:10px}.savedTable th,.savedTable td{padding:5px}}
+@media print{#savedFilesModal{display:none!important}}
+
+
+/* ===== V18 PROGRAM BAŞLIĞI = RAPOR BAŞLIĞI ===== */
+@media screen{
+  body > header{
+    position:static!important;
+    background:#fff!important;
+    color:#172033!important;
+    padding:18px 22px 12px!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  body > header .headerMain{
+    max-width:1180px;
+    margin:0 auto;
+    gap:0!important;
+    border:2px solid #173f70;
+    background:#fff;
+  }
+  body > header .headerTop{
+    display:block!important;
+    position:relative!important;
+    text-align:center!important;
+    background:#173f70!important;
+    color:#fff!important;
+    padding:18px 12px 15px!important;
+    border-bottom:2px solid #173f70;
+  }
+  body > header .headerTopText,
+  body > header .headerTopText h1{
+    width:100%!important;
+    text-align:center!important;
+  }
+  body > header .headerTopText h1{
+    margin:0!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:32px!important;
+    line-height:1.05!important;
+    font-weight:900!important;
+    letter-spacing:.4px!important;
+    color:#fff!important;
+  }
+  body > header .reportTitle{
+    margin-top:8px!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:20px!important;
+    line-height:1.1!important;
+    font-weight:900!important;
+    letter-spacing:.35px!important;
+    color:#fff!important;
+  }
+  body > header #cleanBtn{display:none!important}
+  body > header .headerInfo{
+    display:grid!important;
+    grid-template-columns:1fr 1fr 1fr!important;
+    gap:0!important;
+    align-items:stretch!important;
+    background:#f7f8fb!important;
+  }
+  body > header .hInfo{
+    min-height:88px!important;
+    padding:12px 18px 10px!important;
+    color:#173f70!important;
+    text-align:left!important;
+    border-right:1px solid #8a98aa!important;
+    box-sizing:border-box!important;
+  }
+  body > header .hInfo:last-child{border-right:0!important}
+  body > header .hInfo.red{text-align:center!important}
+  body > header .hInfo.right{text-align:left!important}
+  body > header .hInfo label{
+    display:block!important;
+    margin:0 0 14px!important;
+    color:#526176!important;
+    font-size:13px!important;
+    line-height:1!important;
+    font-weight:900!important;
+    letter-spacing:.45px!important;
+    text-transform:uppercase!important;
+  }
+  body > header .hInfo.red label{text-align:center!important}
+  body > header .hInfo input,
+  body > header .hInfo.right input{
+    width:100%!important;
+    border:0!important;
+    border-bottom:1px solid #9eabb9!important;
+    border-radius:0!important;
+    background:transparent!important;
+    color:#173f70!important;
+    padding:0 0 7px!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:17px!important;
+    font-weight:900!important;
+    text-align:left!important;
+    outline:none!important;
+    box-sizing:border-box!important;
+  }
+  body > header .hInfo.red input{
+    color:#c62828!important;
+    font-size:20px!important;
+    text-align:center!important;
+    text-transform:uppercase!important;
+    border:0!important;
+    border-bottom:1px solid #9eabb9!important;
+    padding:0 0 7px!important;
+    letter-spacing:.5px!important;
+  }
+  body > header .headerActions{
+    display:flex!important;
+    justify-content:center!important;
+    gap:8px!important;
+    flex-wrap:wrap!important;
+    padding:10px 12px!important;
+    background:#fff!important;
+    border-top:1px solid #d6dde7!important;
+  }
+  body > header .headerActions button{
+    background:#173f70!important;
+    color:#fff!important;
+    border:1px solid #12355f!important;
+  }
+  body > header .headerActions .shareBtn{background:#2563eb!important}
+}
+@media screen and (max-width:900px){
+  body > header{padding:8px!important}
+  body > header .headerTopText h1{font-size:24px!important}
+  body > header .reportTitle{font-size:16px!important}
+  body > header .headerInfo{grid-template-columns:1fr!important}
+  body > header .hInfo{border-right:0!important;border-bottom:1px solid #8a98aa!important}
+  body > header .hInfo:last-child{border-bottom:0!important}
+  body > header .hInfo.red,
+  body > header .hInfo.red label,
+  body > header .hInfo.red input{text-align:left!important}
+}
+
+/* ===== ARAÇ KONTROLÜ: KONTROL TARİHİ + KONTROL NOTLARI ===== */
+.controlInfoGrid{display:grid;grid-template-columns:220px 1fr;gap:12px;align-items:start}
+.controlField label{display:block;margin-bottom:6px;font-size:12px;font-weight:900;color:var(--navy)}
+.controlField input,.controlField textarea{width:100%;border:1px solid #b7c5d7;border-radius:8px;padding:9px;font:inherit;background:#fff;color:var(--text)}
+.controlField textarea{min-height:125px;resize:vertical;line-height:1.45}
+.rptControlBox{border:1px solid #758397;border-top:0;padding:8px 10px;display:grid;grid-template-columns:180px 1fr;gap:10px;min-height:64px}
+.rptControlDate{font-size:11px;font-weight:900;color:#173f70;border-right:1px solid #cbd5e1;padding-right:10px}
+.rptControlNotes{font-size:11px;white-space:pre-wrap;line-height:1.4}
+@media(max-width:700px){.controlInfoGrid{grid-template-columns:1fr}}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<header>
+ <div class="headerMain">
+  <div class="headerTop">
+   <div class="headerTopText">
+    <h1>GENÇ SİGORTA EKSPERLİK</h1><div class="reportTitle">PARÇA VE İŞÇİLİK ÖZETİ</div>
+   </div>
+   <button id="cleanBtn" class="soft" onclick="newFile()">YENİ</button>
+  </div>
+
+  <div class="headerInfo">
+   <div class="hInfo blue">
+    <label>RUHSAT SAHİBİ</label>
+    <input id="ruhsatSahibi" type="text" placeholder="Ruhsat sahibi">
+   </div>
+
+   <div class="hInfo red">
+    <label>PLAKA NUMARASI</label>
+    <input id="plakaNo" type="text" placeholder="Plaka">
+   </div>
+
+   <div class="hInfo blue right">
+    <label>SİGORTA ŞİRKETİ</label>
+    <input id="sigortaSirketi" type="text" placeholder="Sigorta şirketi">
+   </div>
+  </div>
+
+  <div class="headerActions">
+   <button onclick="saveFile()">KAYDET</button>
+   <button onclick="newFile()">YENİ</button>
+   <button onclick="showSavedFiles()">KAYITLAR</button>
+   <button onclick="previewReport()">RAPORU GÖRÜNTÜLE</button>
+   <button onclick="printReport()">PDF KAYDET / YAZDIR</button>
+   <button class="shareBtn" onclick="shareReport()">PAYLAŞ</button>
+  </div>
+ </div>
+</header>
+<div class="wrap">
+<section class="card">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+   <h2 style="margin-right:auto">1. BÖLÜM / PARÇA SEÇİMİ</h2>
+   <div class="counter">Toplam Seçili Parça: <span id="selectedCount">0</span></div>
+  </div>
+  <div id="mainTabs" class="mainTabs"></div>
+  <div id="subTabs" class="subTabs"></div>
+  <div id="breadcrumb" class="breadcrumb"></div>
+  
+   <div id="picker" class="part-picker"></div>
+
+   <div id="otherDirectWrap">
+    <div class="small" style="margin-bottom:7px">
+     <b>DİĞER BÖLÜMÜ:</b> Parça adını yazınız. Girilen parça otomatik olarak işlem ve parça bazlı işçilik tablolarına aktarılır.
+    </div>
+    <div class="scroll">
+     <table id="otherDirectTable">
+      <thead><tr>
+       <th>Parça Adı</th>
+       <th class="col-parttype">Parça Nevi</th>
+       <th class="col-st">Sökme-Takma</th>
+       <th class="col-change">Değişim</th>
+       <th class="col-repair">Onarım</th>
+       <th class="col-paint">Boya</th>
+       <th class="col-control">Kontrol</th>
+       <th class="col-mo">Mobil Onarım</th>
+       <th class="col-note">Not</th>
+       <th class="col-del">Sil</th>
+      </tr></thead>
+      <tbody id="otherDirectBody"></tbody>
+     </table>
+    </div>
+    <div class="otherDirectAdd"><button onclick="addOtherDirectRow()">+ Ekle</button></div>
+   </div>
+
+  <div class="addPartRow" id="normalPartAddRow">
+   <input id="customPartName" placeholder="Bu bölüme yeni parça adı yazınız">
+   <button onclick="addCustomPart()">+ Parça Ekle</button>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2>2. SEÇİLEN PARÇALAR / İŞLEM TABLOSU</h2>
+  <div class="small" style="margin-bottom:7px">Bütün bölümlerde seçilen parçalar tek tabloda toplanır.</div>
+  <div class="scroll">
+   <table>
+    <thead><tr>
+     <th>Parça Adı</th>
+     <th class="col-parttype">Parça Nevi</th>
+     <th class="col-st">Sökme-Takma</th>
+     <th class="col-change">Değişim</th>
+     <th class="col-repair">Onarım</th>
+     <th class="col-paint">Boya</th>
+     <th class="col-control">Kontrol</th>
+     <th class="col-mo">Mobil Onarım</th>
+     <th class="col-note">Not</th>
+     <th class="col-del">Sil</th>
+    </tr></thead>
+    <tbody id="partBody"></tbody>
+   </table>
+  </div>
+  <div class="addBelow"><button onclick="showPartAddForm()">+ Ekle</button></div>
+  <div id="partAddForm" class="inlineAddForm">
+   <input id="tableCustomPartName" placeholder="Eklenecek parça adını yazınız" onkeydown="if(event.key==='Enter'){event.preventDefault();savePartFromTable()}else if(event.key==='Escape'){hidePartAddForm()}">
+   <button onclick="savePartFromTable()">Parçayı Ekle</button>
+   <button class="cancel" onclick="hidePartAddForm()">Vazgeç</button>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2>3. İŞÇİLİKLER</h2>
+  <div class="laborTabs">
+   <button id="bulkBtn" class="active" onclick="setLaborMode('bulk')">Toplu İşçilik</button>
+   <button id="pieceBtn" onclick="setLaborMode('piece')">Parça Bazlı İşçilik</button>
+  </div>
+  <div id="bulkPanel"></div>
+  <div id="piecePanel" style="display:none"></div>
+  <div class="laborSummary">
+   <div class="sum"><span id="lab1">Kaporta</span><b id="t_1">0.-</b></div>
+   <div class="sum"><span id="lab2">Boya</span><b id="t_2">0.-</b></div>
+   <div class="sum"><span id="lab3">Elektrik</span><b id="t_3">0.-</b></div>
+   <div class="sum"><span id="lab4">Döşeme</span><b id="t_4">0.-</b></div>
+   <div class="sum"><span id="lab5">Cam</span><b id="t_5">0.-</b></div>
+   <div class="sum"><span id="lab6">Mekanik</span><b id="t_6">0.-</b></div>
+   <div class="sum"><span id="lab7">Ek İşçilik</span><b id="t_7">0.-</b></div>
+  </div>
+  <div class="total">Genel Toplam İşçilik: <span id="laborTotal">0,00 TL</span></div>
+ </section>
+
+<section class="card">
+ <h2>4. KONTROL BİLGİLERİ</h2>
+ <div class="controlInfoGrid">
+  <div class="controlField">
+   <label for="kontrolTarihi">KONTROL TARİHİ</label>
+   <input id="kontrolTarihi" type="date">
+  </div>
+  <div class="controlField">
+   <label for="kontrolNotlari">KONTROL NOTLARI</label>
+   <textarea id="kontrolNotlari" placeholder="Araç kontrolünde tespit edilen hususları ve eksper notlarını yazınız..."></textarea>
+  </div>
+ </div>
+</section>
+</div>
+
+
+<div id="reportModal" aria-hidden="true">
+ <div class="reportModalToolbar">
+  <button onclick="printReport()">PDF KAYDET / YAZDIR</button>
+  <button onclick="shareReport()">PAYLAŞ</button>
+  <button class="closeReport" onclick="closeReport()">KAPAT</button>
+ </div>
+ <div id="reportSheet" class="reportSheet"></div>
+</div>
+
+<div id="savedFilesModal" class="savedModal" aria-hidden="true">
+ <div class="savedBox">
+  <div class="savedHead"><h3>KAYITLI DOSYALAR</h3><button class="soft" onclick="closeSavedFiles()">KAPAT</button></div>
+  <div class="savedBody" id="savedFilesBody"></div>
+ </div>
+</div>
+
+<script>
+const regionalDamageData={"Ön Bölüm": {"Ön Bölüm": ["Ön Tampon", "Ön Tampon Alt Parçası / Spoiler", "Ön Tampon Izgarası", "Ön Tampon Demiri", "Ön Tampon Bağlantı Ayakları", "Ön Panjur / Ana Izgara", "Motor Kaputu", "Sağ Motor Kaput Menteşesi", "Sol Motor Kaput Menteşesi", "Ön Panel", "Sağ Ön Çamurluk", "Sol Ön Çamurluk", "Sağ Ön Çamurluk Davlumbazı", "Sol Ön Çamurluk Davlumbazı", "Sağ Far", "Sol Far", "Sağ Sis Farı", "Sol Sis Farı", "Sağ Gündüz Farı / DRL", "Sol Gündüz Farı / DRL", "Sağ Far Alt/Üst Bağlantı Sacı", "Sol Far Alt/Üst Bağlantı Sacı", "Kaput Kilit Sacı / Üst Panel", "Sağ Ön Çamurluk İç Sacı", "Sol Ön Çamurluk İç Sacı", "Sağ Ön Şasi Ucu", "Sol Ön Şasi Ucu", "Ön Travers"]}, "Sağ Bölüm": {"Sağ Ön Kapı Grubu": ["Sağ ön kapı komple", "Sağ ön kapı sacı", "Sağ ön kapı menteşeleri", "Sağ ön kapı kilidi", "Sağ ön kapı kilit karşılığı", "Sağ ön kapı kolu dış", "Sağ ön kapı kolu iç", "Sağ ön kapı aynası komple", "Sağ ön kapı ayna camı", "Sağ ön kapı ayna kapağı", "Sağ ön kapı ayna sinyali", "Sağ ön kapı ayna motoru", "Sağ ön kapı camı", "Sağ ön kapı cam krikosu", "Sağ ön kapı cam motoru", "Sağ ön kapı cam fitili", "Sağ ön kapı cam sıyırıcı fitili", "Sağ ön kapı çıtası", "Sağ ön kapı bakaliti", "Sağ ön kapı iç döşemesi", "Sağ ön kapı hoparlörü", "Sağ ön kapı tesisatı"], "Sağ Arka Kapı Grubu": ["Sağ arka kapı komple", "Sağ arka kapı sacı", "Sağ arka kapı menteşeleri", "Sağ arka kapı kilidi", "Sağ arka kapı kilit karşılığı", "Sağ arka kapı kolu dış", "Sağ arka kapı kolu iç", "Sağ arka kapı camı", "Sağ arka kapı cam krikosu", "Sağ arka kapı cam motoru", "Sağ arka kapı cam fitili", "Sağ arka kapı cam sıyırıcı fitili", "Sağ arka kapı çıtası", "Sağ arka kapı bakaliti", "Sağ arka kapı iç döşemesi", "Sağ arka kapı hoparlörü", "Sağ arka kapı tesisatı"], "Sağ Direk ve Marşpiyel Grubu": ["Sağ A direği", "Sağ B direği", "Sağ C direği", "Sağ marşpiyel", "Sağ marşpiyel iç sacı", "Sağ marşpiyel dış kaplaması", "Sağ marşpiyel bakaliti", "Sağ ön kapı direği", "Sağ arka kapı direği"], "Sağ Arka Çamurluk Grubu": ["Sağ arka çamurluk", "Sağ arka çamurluk iç sacı", "Sağ arka çamurluk davlumbazı", "Sağ arka çamurluk bakaliti", "Sağ arka çamurluk bağlantı sacı", "Sağ arka çamurluk ağız sacı"]}, "Sol Bölüm": {"Sol Ön Kapı Grubu": ["Sol ön kapı komple", "Sol ön kapı sacı", "Sol ön kapı menteşeleri", "Sol ön kapı kilidi", "Sol ön kapı kilit karşılığı", "Sol ön kapı kolu dış", "Sol ön kapı kolu iç", "Sol ön kapı aynası komple", "Sol ön kapı ayna camı", "Sol ön kapı ayna kapağı", "Sol ön kapı ayna sinyali", "Sol ön kapı ayna motoru", "Sol ön kapı camı", "Sol ön kapı cam krikosu", "Sol ön kapı cam motoru", "Sol ön kapı cam fitili", "Sol ön kapı cam sıyırıcı fitili", "Sol ön kapı çıtası", "Sol ön kapı bakaliti", "Sol ön kapı iç döşemesi", "Sol ön kapı hoparlörü", "Sol ön kapı tesisatı"], "Sol Arka Kapı Grubu": ["Sol arka kapı komple", "Sol arka kapı sacı", "Sol arka kapı menteşeleri", "Sol arka kapı kilidi", "Sol arka kapı kilit karşılığı", "Sol arka kapı kolu dış", "Sol arka kapı kolu iç", "Sol arka kapı camı", "Sol arka kapı cam krikosu", "Sol arka kapı cam motoru", "Sol arka kapı cam fitili", "Sol arka kapı cam sıyırıcı fitili", "Sol arka kapı çıtası", "Sol arka kapı bakaliti", "Sol arka kapı iç döşemesi", "Sol arka kapı hoparlörü", "Sol arka kapı tesisatı"], "Sol Direk ve Marşpiyel Grubu": ["Sol A direği", "Sol B direği", "Sol C direği", "Sol marşpiyel", "Sol marşpiyel iç sacı", "Sol marşpiyel dış kaplaması", "Sol marşpiyel bakaliti", "Sol ön kapı direği", "Sol arka kapı direği"], "Sol Arka Çamurluk Grubu": ["Sol arka çamurluk", "Sol arka çamurluk iç sacı", "Sol arka çamurluk davlumbazı", "Sol arka çamurluk bakaliti", "Sol arka çamurluk bağlantı sacı", "Sol arka çamurluk ağız sacı"]}, "Arka Bölüm": {"Arka Bölüm": ["Arka Tampon", "Arka Tampon Alt Parçası / Difüzör", "Arka Tampon Demiri", "Arka Tampon Bağlantı Ayakları", "Bagaj Kapağı", "Sağ Bagaj Kapağı Menteşesi", "Sol Bagaj Kapağı Menteşesi", "Bagaj Kapak Kilidi / Kilit Karşılığı", "Arka Panel", "Stepne Havuzu / Bagaj Taban Sacı", "Sağ Arka Çamurluk", "Sol Arka Çamurluk", "Sağ Arka Çamurluk İç Sacı", "Sol Arka Çamurluk İç Sacı", "Sağ Arka Davlumbaz", "Sol Arka Davlumbaz", "Sağ Stop Lambası", "Sol Stop Lambası", "Sağ Tampon Reflektörü", "Sol Tampon Reflektörü", "Sağ Arka Sis Lambası", "Sol Arka Sis Lambası", "Sağ Arka Şasi Ucu", "Sol Arka Şasi Ucu", "Arka Travers"]}, "Mekanik Bölüm": {"Radyatör Grubu": ["Su radyatörü", "Klima radyatörü", "Intercooler", "Radyatör fanı", "Fan motoru", "Fan davlumbazı", "Radyatör üst hortumu", "Radyatör alt hortumu", "Genleşme kabı", "Radyatör bağlantı ayakları"], "Sağ Ön Yürür Aksam": ["Sağ ön amortisör", "Sağ ön amortisör tablası", "Sağ ön helezon yayı", "Sağ ön salıncak", "Sağ ön rotil", "Sağ ön aks", "Sağ ön aks kafası", "Sağ ön porya", "Sağ ön taşıyıcı", "Sağ ön fren diski", "Sağ ön fren kaliperi", "Sağ ön rot kolu", "Sağ ön rot başı", "Sağ ön teker rulmanı"], "Sol Ön Yürür Aksam": ["Sol ön amortisör", "Sol ön amortisör tablası", "Sol ön helezon yayı", "Sol ön salıncak", "Sol ön rotil", "Sol ön aks", "Sol ön aks kafası", "Sol ön porya", "Sol ön taşıyıcı", "Sol ön fren diski", "Sol ön fren kaliperi", "Sol ön rot kolu", "Sol ön rot başı", "Sol ön teker rulmanı"], "Sağ Arka Yürür Aksam": ["Sağ arka amortisör", "Sağ arka helezon yayı", "Sağ arka salıncak", "Sağ arka taşıyıcı", "Sağ arka porya", "Sağ arka fren diski", "Sağ arka fren kaliperi", "Sağ arka teker rulmanı"], "Sol Arka Yürür Aksam": ["Sol arka amortisör", "Sol arka helezon yayı", "Sol arka salıncak", "Sol arka taşıyıcı", "Sol arka porya", "Sol arka fren diski", "Sol arka fren kaliperi", "Sol arka teker rulmanı"], "Motor Grubu": ["Karter", "Karter muhafazası", "Motor kulağı sağ", "Motor kulağı sol", "Motor arka kulağı", "Alternatör", "Marş motoru", "Klima kompresörü", "Hava filtre kutusu", "Motor üst kapağı"], "Egzoz Grubu": ["Katalitik konvertör", "Partikül filtresi", "Orta susturucu", "Arka susturucu", "Egzoz borusu", "Egzoz askıları", "Egzoz ısı sacı"]}, "İç Bölüm": {"Temel İç Parçalar": ["Torpido", "Torpido kapağı", "Ön konsol", "Orta konsol", "Gösterge paneli", "Direksiyon simidi", "Vites konsolu", "Tavan döşemesi", "Sağ ön iç kaplama", "Sol ön iç kaplama"], "Airbag ve Emniyet Sistemleri": ["Sürücü airbag'i", "Yolcu airbag'i", "Sağ ön koltuk airbag'i", "Sol ön koltuk airbag'i", "Sağ perde airbag'i", "Sol perde airbag'i", "Sağ ön emniyet kemeri", "Sol ön emniyet kemeri", "Sağ arka emniyet kemeri", "Sol arka emniyet kemeri", "Airbag beyni", "Darbe sensörü"]}, "Tavan Bölümü": {"Tavan Sacı ve Tavan Bağlantıları": ["Tavan sacı", "Ön tavan traversi", "Orta tavan traversi", "Arka tavan traversi", "Sağ tavan kenar sacı", "Sol tavan kenar sacı", "Sağ tavan oluğu", "Sol tavan oluğu"], "Sunroof ve Cam Tavan": ["Sunroof camı", "Panoramik cam tavan", "Sunroof çerçevesi", "Sunroof mekanizması", "Sunroof motoru", "Sunroof rayı sağ", "Sunroof rayı sol", "Sunroof perdesi", "Sunroof perde motoru", "Sunroof fitili", "Sunroof su tahliye hortumu"], "Tavan ve İç Döşemesi": ["Tavan döşemesi", "Sağ güneşlik", "Sol güneşlik", "İç aydınlatma lambası", "Tavan tutamağı", "Tavan konsolu"]}, "Cam Grubu": {"Ön Cam": ["Ön cam", "Ön cam fitili", "Ön cam sağ çıtası", "Ön cam sol çıtası", "Ön cam alt bakaliti", "Ön cam su oluğu", "Yağmur sensörü", "Ön cam kamera ünitesi", "Ön cam kamera kapağı"], "Arka Cam": ["Arka cam", "Arka cam fitili", "Arka cam rezistansı", "Arka cam sileceği", "Arka cam silecek motoru", "Arka cam silecek kolu", "Arka cam su fıskiyesi"], "Sabit ve Yan Camlar": ["Sağ ön sabit cam", "Sol ön sabit cam", "Sağ arka sabit cam", "Sol arka sabit cam", "Sağ kelebek camı", "Sol kelebek camı", "Sağ bagaj yan camı", "Sol bagaj yan camı", "Sabit cam fitilleri", "Sabit cam çıtaları"]}, "Şase Grubu": {"Ön Şase Grubu": ["Ön sağ şase kolu", "Ön sol şase kolu", "Ön sağ şase ucu", "Ön sol şase ucu", "Ön travers", "Ön alt şase", "Ön beşik", "Ön sağ şase bağlantı sacı", "Ön sol şase bağlantı sacı"], "Arka Şase Grubu": ["Sağ arka şase kolu", "Sol arka şase kolu", "Sağ arka şase ucu", "Sol arka şase ucu", "Arka travers", "Arka alt şase", "Sağ arka şase bağlantı sacı", "Sol arka şase bağlantı sacı"], "Şase Yardımcı Parçaları": ["Şase bağlantı sacları", "Şase takviye sacları", "Taban bağlantı sacları", "Ön darbe emiciler", "Arka darbe emiciler", "Motor alt muhafazası"]}, "Diğer": {"Diğer": []}};
+const mainNames=Object.keys(regionalDamageData);
+let activeMain=mainNames[0],activeSub=Object.keys(regionalDamageData[activeMain])[0];
+const selected={}; const rows={}; const customBySub={}; const piece={};
+const otherDirectRows=[]; let otherDirectSeq=0;
+const extraBulkLabor=[]; const extraPieceLabor=[];
+let laborMode='bulk';
+let currentRecordId=null;
+const STORAGE_KEY='genc_sigorta_parca_iscilik_v17_records';
+const partTypes=['Orijinal','Logosuz Orijinal','Yan Sanayi','Çıkma','Onarım Görmüş'];
+const repairChoices=['Az','Orta','Ağır'];
+const paintChoices=['Boyasız Onarım','Kısmi','Tam'];
+const bulkFields=[['ka','Kaporta'],['bo','Boya'],['el','Elektrik'],['do','Döşeme'],['ca','Cam'],['me','Mekanik']];
+const pieceFields=[['st','Sökme-Takma'],['on','Onarım'],['bo','Boya'],['el','Elektrik'],['do','Döşeme'],['ca','Cam'],['me','Mekanik']];
+const bulk={};bulkFields.forEach(x=>bulk[x[0]]='');
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function rowKey(main,sub,name){return main+'|||'+sub+'|||'+name}
+function ensure(key,main,sub,name){if(!rows[key])rows[key]={key,main,sub,name,partType:'',sokTak:false,degisim:false,repair:'',paint:'',kontrol:false,mo:false,note:''};return rows[key]}
+function currentParts(){return [...(regionalDamageData[activeMain][activeSub]||[]),...(customBySub[activeMain+'|||'+activeSub]||[])]}
+function renderTabs(){
+ document.getElementById('mainTabs').innerHTML=mainNames.map(m=>`<button class="${m===activeMain?'active':''}" onclick="setMain('${encodeURIComponent(m)}')">${esc(m)}</button>`).join('');
+ const subs=Object.keys(regionalDamageData[activeMain]||{});
+ document.getElementById('subTabs').innerHTML=subs.map(s=>`<button class="${s===activeSub?'active':''}" onclick="setSub('${encodeURIComponent(s)}')">${esc(s)}</button>`).join('');
+ document.getElementById('breadcrumb').textContent=activeMain+' → '+activeSub;
+}
+function setMain(enc){activeMain=decodeURIComponent(enc);activeSub=Object.keys(regionalDamageData[activeMain])[0];renderAll()}
+function setSub(enc){activeSub=decodeURIComponent(enc);renderAll()}
+function renderPicker(){
+  const isOther=(activeMain==='Diğer' && activeSub==='Diğer');
+  document.getElementById('otherDirectWrap').classList.toggle('show',isOther);
+  document.getElementById('normalPartAddRow').style.display=isOther?'none':'grid';
+
+  if(isOther){
+    document.getElementById('picker').innerHTML='';
+    ensureOtherDirectTen();
+    renderOtherDirectTable();
+  }else{
+    const parts=currentParts();
+    document.getElementById('picker').innerHTML=parts.length?parts.map(name=>{
+      const key=rowKey(activeMain,activeSub,name);
+      return `<label class="part-choice ${selected[key]?'selected':''}"><input type="checkbox" ${selected[key]?'checked':''} onchange="togglePart('${encodeURIComponent(key)}',this.checked)"><span>${esc(name)}</span></label>`;
+    }).join(''):'<div class="small">Bu grupta sabit parça yok. + Parça Ekle ile ekleyebilirsiniz.</div>';
+  }
+
+  document.getElementById('selectedCount').textContent=Object.keys(selected).filter(k=>selected[k]).length;
+}
+function togglePart(enc,on){
+ const key=decodeURIComponent(enc),[main,sub,name]=key.split('|||');
+ if(on){selected[key]=true;ensure(key,main,sub,name)}else delete selected[key];
+ renderAll(false);
+}
+function addCustomPart(){
+ const inp=document.getElementById('customPartName'),name=(inp.value||'').trim();if(!name)return;
+ const k=activeMain+'|||'+activeSub;if(!customBySub[k])customBySub[k]=[];
+ if(!customBySub[k].some(x=>x.toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR')))customBySub[k].push(name);
+ const key=rowKey(activeMain,activeSub,name);selected[key]=true;ensure(key,activeMain,activeSub,name);inp.value='';renderAll(false);
+}
+function removePart(enc){const key=decodeURIComponent(enc);delete selected[key];renderAll(false)}
+function setRow(enc,field,val){const key=decodeURIComponent(enc);if(rows[key])rows[key][field]=val;if(field!=='note')renderPartTable();renderLabor();calcLabor()}
+function ensurePiece(key){if(!piece[key])piece[key]={st:'',on:'',bo:'',el:'',do:'',ca:'',me:''};return piece[key]}
+function hasLabor(p){return pieceFields.some(([f])=>money(p&&p[f])>0)}
+function setPieceLabor(enc,field,val,inputEl){
+ val=formatMoneyInput(val); if(inputEl) inputEl.value=val;
+ const key=decodeURIComponent(enc),p=ensurePiece(key);p[field]=val;
+ const tr=inputEl&&inputEl.closest('tr'),td=inputEl&&inputEl.closest('td');
+ if(td)td.classList.toggle('active-labor',money(val)>0);
+ if(tr){const done=hasLabor(p);tr.classList.toggle('labor-done-row',done);tr.classList.toggle('labor-pending-row',!done)}
+ calcLabor();
+}
+function setBulkLabor(field,val,inputEl){
+ val=formatMoneyInput(val); if(inputEl) inputEl.value=val;
+ bulk[field]=val;
+ const tr=inputEl&&inputEl.closest('tr');if(tr)tr.classList.toggle('bulk-labor-done',money(val)>0);
+ calcLabor();
+}
+function showPartAddForm(){
+ const form=document.getElementById('partAddForm'),inp=document.getElementById('tableCustomPartName');
+ form.classList.add('show');inp.value='';setTimeout(()=>inp.focus(),0);
+}
+function hidePartAddForm(){
+ const form=document.getElementById('partAddForm'),inp=document.getElementById('tableCustomPartName');
+ form.classList.remove('show');inp.value='';
+}
+function savePartFromTable(){
+ const inp=document.getElementById('tableCustomPartName'),name=(inp.value||'').trim();if(!name){inp.focus();return;}
+ const main='Diğer',sub='Diğer',k=main+'|||'+sub;if(!customBySub[k])customBySub[k]=[];
+ if(!customBySub[k].some(x=>x.toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR')))customBySub[k].push(name);
+ const key=rowKey(main,sub,name);selected[key]=true;ensure(key,main,sub,name);hidePartAddForm();renderAll(false);
+}
+function addBulkLabor(){
+ const name=(prompt('Eklenecek işçilik kalemini yazınız:')||'').trim();if(!name)return;
+ extraBulkLabor.push({id:'b'+Date.now()+Math.random().toString(16).slice(2),name,amount:''});renderLabor();
+}
+function setExtraBulk(id,val,inputEl){val=formatMoneyInput(val);if(inputEl)inputEl.value=val;const r=extraBulkLabor.find(x=>x.id===id);if(r)r.amount=val;const tr=inputEl&&inputEl.closest('tr');if(tr)tr.classList.toggle('bulk-labor-done',money(val)>0);calcLabor()}
+function removeExtraBulk(id){const i=extraBulkLabor.findIndex(x=>x.id===id);if(i>=0)extraBulkLabor.splice(i,1);renderLabor()}
+function addPieceLaborRow(){
+ const name=(prompt('Eklenecek işçilik açıklamasını yazınız:')||'').trim();if(!name)return;
+ const r={id:'p'+Date.now()+Math.random().toString(16).slice(2),name};pieceFields.forEach(([f])=>r[f]='');extraPieceLabor.push(r);renderLabor();
+}
+function setExtraPiece(id,field,val,inputEl){val=formatMoneyInput(val);if(inputEl)inputEl.value=val;const r=extraPieceLabor.find(x=>x.id===id);if(!r)return;r[field]=val;const tr=inputEl&&inputEl.closest('tr'),td=inputEl&&inputEl.closest('td');if(td)td.classList.toggle('active-labor',money(val)>0);if(tr){const done=pieceFields.some(([f])=>money(r[f])>0);tr.classList.toggle('labor-done-row',done);tr.classList.toggle('labor-pending-row',!done)}calcLabor()}
+function removeExtraPiece(id){const i=extraPieceLabor.findIndex(x=>x.id===id);if(i>=0)extraPieceLabor.splice(i,1);renderLabor()}
+function hasOperation(d){return !!(d.sokTak||d.degisim||d.repair||d.paint||d.kontrol||d.mo)}
+
+function makeOtherDirectRow(){
+  const id='od'+(++otherDirectSeq);
+  otherDirectRows.push({
+    id,
+    key:'',
+    name:'',
+    partType:'',
+    sokTak:false,
+    degisim:false,
+    repair:'',
+    paint:'',
+    kontrol:false,
+    mo:false,
+    note:''
+  });
+}
+function ensureOtherDirectTen(){
+  while(otherDirectRows.length<10) makeOtherDirectRow();
+}
+function addOtherDirectRow(){
+  makeOtherDirectRow();
+  renderOtherDirectTable();
+}
+function otherRowKey(r){
+  return 'Diğer|||Diğer|||'+r.id;
+}
+function syncOtherDirectToSelected(r){
+  const name=(r.name||'').trim();
+
+  // Her manuel satır için sabit benzersiz key kullanıyoruz.
+  // Böylece isim değişse bile işçilik verileri kaybolmaz.
+  if(!r.key) r.key=otherRowKey(r);
+  const key=r.key;
+
+  if(!name){
+    delete selected[key];
+    if(rows[key]) rows[key].name='';
+    return;
+  }
+
+  selected[key]=true;
+  if(!rows[key]){
+    rows[key]={
+      key,
+      main:'Diğer',
+      sub:'Diğer',
+      name:name,
+      partType:r.partType||'',
+      sokTak:!!r.sokTak,
+      degisim:!!r.degisim,
+      repair:r.repair||'',
+      paint:r.paint||'',
+      kontrol:!!r.kontrol,
+      mo:!!r.mo,
+      note:r.note||''
+    };
+  }else{
+    rows[key].name=name;
+    rows[key].partType=r.partType||'';
+    rows[key].sokTak=!!r.sokTak;
+    rows[key].degisim=!!r.degisim;
+    rows[key].repair=r.repair||'';
+    rows[key].paint=r.paint||'';
+    rows[key].kontrol=!!r.kontrol;
+    rows[key].mo=!!r.mo;
+    rows[key].note=r.note||'';
+  }
+}
+function setOtherDirect(id,field,val){
+  const r=otherDirectRows.find(x=>x.id===id);
+  if(!r)return;
+  r[field]=val;
+
+  // Ad girildiği anda seçilen parçalar ve parça bazlı işçilik tablosuna aktar.
+  syncOtherDirectToSelected(r);
+
+  // Input yazımında imleci bozmamak için sadece gerekli tabloları yenile.
+  if(field==='name' || field==='note'){
+    renderPartTable();
+    renderLabor();
+    calcLabor();
+  }else{
+    renderOtherDirectTable();
+    renderPartTable();
+    renderLabor();
+    calcLabor();
+  }
+}
+function removeOtherDirectRow(id){
+  const i=otherDirectRows.findIndex(x=>x.id===id);
+  if(i<0)return;
+
+  const r=otherDirectRows[i];
+  if(r.key){
+    delete selected[r.key];
+    delete rows[r.key];
+    delete piece[r.key];
+  }
+
+  otherDirectRows.splice(i,1);
+  ensureOtherDirectTen();
+  renderOtherDirectTable();
+  renderPartTable();
+  renderLabor();
+  calcLabor();
+}
+function renderOtherDirectTable(){
+  const body=document.getElementById('otherDirectBody');
+  if(!body)return;
+
+  body.innerHTML=otherDirectRows.map(r=>{
+    const done=hasOperation(r);
+    return `<tr class="${done?'processed-row':'pending-row'}">
+      <td><input class="otherPartName" type="text" value="${esc(r.name)}" placeholder="Parça adını yazınız" oninput="setOtherDirect('${r.id}','name',this.value)"></td>
+      <td><select onchange="setOtherDirect('${r.id}','partType',this.value)"><option value="">Seçiniz</option>${partTypes.map(v=>`<option ${r.partType===v?'selected':''}>${v}</option>`).join('')}</select></td>
+      <td class="checkcell ${r.sokTak?'active-op':''}"><label><input type="checkbox" ${r.sokTak?'checked':''} onchange="setOtherDirect('${r.id}','sokTak',this.checked)"> S/T</label></td>
+      <td class="checkcell ${r.degisim?'active-op':''}"><label><input type="checkbox" ${r.degisim?'checked':''} onchange="setOtherDirect('${r.id}','degisim',this.checked)"> Değişim</label></td>
+      <td class="${r.repair?'active-op':''}"><select onchange="setOtherDirect('${r.id}','repair',this.value)"><option value="">-</option>${repairChoices.map(v=>`<option ${r.repair===v?'selected':''}>${v}</option>`).join('')}</select></td>
+      <td class="${r.paint?'active-op':''}"><select onchange="setOtherDirect('${r.id}','paint',this.value)"><option value="">-</option>${paintChoices.map(v=>`<option ${r.paint===v?'selected':''}>${v}</option>`).join('')}</select></td>
+      <td class="checkcell ${r.kontrol?'active-op':''}"><label><input type="checkbox" ${r.kontrol?'checked':''} onchange="setOtherDirect('${r.id}','kontrol',this.checked)"> Kontrol</label></td>
+      <td class="checkcell ${r.mo?'active-op':''}"><label><input type="checkbox" ${r.mo?'checked':''} onchange="setOtherDirect('${r.id}','mo',this.checked)"> MO</label></td>
+      <td><input type="text" value="${esc(r.note)}" placeholder="Not" oninput="setOtherDirect('${r.id}','note',this.value)"></td>
+      <td><button class="danger" onclick="removeOtherDirectRow('${r.id}')">×</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPartTable(){
+ const keys=Object.keys(selected).filter(k=>selected[k]);
+ let h='';
+ keys.forEach(key=>{
+  const d=rows[key],enc=encodeURIComponent(key),done=hasOperation(d);
+  h+=`<tr class="${done?'processed-row':'pending-row'}">
+   <td class="pieceName">${esc(d.name)}<div class="small">${esc(d.main)}</div></td>
+   <td><select onchange="setRow('${enc}','partType',this.value)"><option value="">Seçiniz</option>${partTypes.map(v=>`<option ${d.partType===v?'selected':''}>${v}</option>`).join('')}</select></td>
+   <td class="checkcell ${d.sokTak?'active-op':''}"><label><input type="checkbox" ${d.sokTak?'checked':''} onchange="setRow('${enc}','sokTak',this.checked)"> S/T</label></td>
+   <td class="checkcell ${d.degisim?'active-op':''}"><label><input type="checkbox" ${d.degisim?'checked':''} onchange="setRow('${enc}','degisim',this.checked)"> Değişim</label></td>
+   <td class="${d.repair?'active-op':''}"><select onchange="setRow('${enc}','repair',this.value)"><option value="">-</option>${repairChoices.map(v=>`<option ${d.repair===v?'selected':''}>${v}</option>`).join('')}</select></td>
+   <td class="${d.paint?'active-op':''}"><select onchange="setRow('${enc}','paint',this.value)"><option value="">-</option>${paintChoices.map(v=>`<option ${d.paint===v?'selected':''}>${v}</option>`).join('')}</select></td>
+   <td class="checkcell ${d.kontrol?'active-op':''}"><label><input type="checkbox" ${d.kontrol?'checked':''} onchange="setRow('${enc}','kontrol',this.checked)"> Kontrol</label></td>
+   <td class="checkcell ${d.mo?'active-op':''}"><label><input type="checkbox" ${d.mo?'checked':''} onchange="setRow('${enc}','mo',this.checked)"> MO</label></td>
+   <td><input type="text" value="${esc(d.note)}" oninput="setRow('${enc}','note',this.value)" placeholder="Not"></td>
+   <td><button class="danger" onclick="removePart('${enc}')">×</button></td>
+  </tr>`;
+ });
+ document.getElementById('partBody').innerHTML=h||'<tr><td colspan="10">Henüz parça seçilmedi.</td></tr>';
+}
+
+function opText(d){
+ const a=[];if(d.sokTak)a.push('Sökme-Takma');if(d.degisim)a.push('Değişim');if(d.repair)a.push(d.repair+' Onarım');if(d.paint)a.push(d.paint==='Tam'?'Tam Boya':d.paint==='Kısmi'?'Kısmi Boya':d.paint);if(d.kontrol)a.push('Kontrol');if(d.mo)a.push('MO');return a.join(' / ')||'Seçim';
+}
+function setLaborMode(mode){laborMode=mode;document.getElementById('bulkBtn').classList.toggle('active',mode==='bulk');document.getElementById('pieceBtn').classList.toggle('active',mode==='piece');document.getElementById('bulkPanel').style.display=mode==='bulk'?'block':'none';document.getElementById('piecePanel').style.display=mode==='piece'?'block':'none';renderLabor()}
+function renderLabor(){
+ const keys=Object.keys(selected).filter(k=>selected[k]);
+ if(laborMode==='bulk'){
+  const std=bulkFields.map(([f,n])=>`<tr class="${money(bulk[f])>0?'bulk-labor-done':''}"><td>${n}</td><td><input type="text" value="${bulk[f]}" placeholder="0.-" oninput="setBulkLabor('${f}',this.value,this)"></td><td></td></tr>`).join('');
+  const extra=extraBulkLabor.map(r=>`<tr class="${money(r.amount)>0?'bulk-labor-done':''}"><td><input class="extraNameInput" type="text" value="${esc(r.name)}" oninput="r=extraBulkLabor.find(x=>x.id==='${r.id}');if(r)r.name=this.value"></td><td><input type="text" value="${r.amount}" placeholder="0.-" oninput="setExtraBulk('${r.id}',this.value,this)"></td><td style="width:48px"><button class="danger" onclick="removeExtraBulk('${r.id}')">×</button></td></tr>`).join('');
+  document.getElementById('bulkPanel').innerHTML='<table style="min-width:0"><thead><tr><th>İşçilik Kalemi</th><th>Tutar</th><th style="width:48px">Sil</th></tr></thead><tbody>'+std+extra+'</tbody></table><div class="addBelow"><button onclick="addBulkLabor()">+ İşçilik Ekle</button></div>';
+ }else{
+  let h='';
+  keys.forEach(key=>{const d=rows[key],p=ensurePiece(key),enc=encodeURIComponent(key),laborDone=hasLabor(p);h+=`<tr class="${laborDone?'labor-done-row':'labor-pending-row'}"><td class="pieceName">${esc(d.name)}</td><td>${esc(opText(d))}</td>${pieceFields.map(([f])=>`<td class="${money(p[f])>0?'active-labor':''}"><input type="text" value="${p[f]||''}" placeholder="0.-" oninput="setPieceLabor('${enc}','${f}',this.value,this)"></td>`).join('')}<td></td></tr>`});
+  extraPieceLabor.forEach(r=>{const done=pieceFields.some(([f])=>money(r[f])>0);h+=`<tr class="${done?'labor-done-row':'labor-pending-row'}"><td class="pieceName"><input class="extraNameInput" type="text" value="${esc(r.name)}" oninput="r=extraPieceLabor.find(x=>x.id==='${r.id}');if(r)r.name=this.value"></td><td>Ek İşçilik</td>${pieceFields.map(([f])=>`<td class="${money(r[f])>0?'active-labor':''}"><input type="text" value="${r[f]||''}" placeholder="0.-" oninput="setExtraPiece('${r.id}','${f}',this.value,this)"></td>`).join('')}<td><button class="danger" onclick="removeExtraPiece('${r.id}')">×</button></td></tr>`});
+  const colspan=pieceFields.length+3;
+  document.getElementById('piecePanel').innerHTML='<div class="small" style="margin-bottom:6px">Seçilen parçalar otomatik gelir; eksper işçilikleri istediği kaleme dağıtır.</div><div class="scroll"><table><thead><tr><th>Parça</th><th>İşlem</th>'+pieceFields.map(x=>`<th>${x[1]}</th>`).join('')+'<th style="width:48px">Sil</th></tr></thead><tbody>'+(h||`<tr><td colspan="${colspan}">Seçili parça yok.</td></tr>`)+'</tbody></table></div><div class="addBelow"><button onclick="addPieceLaborRow()">+ Ekle</button></div>';
+ }
+ calcLabor();
+}
+function money(v){
+ let s=String(v||'').trim().replace(/\s/g,'').replace(/TL/gi,'').replace(/₺/g,'').replace(/\.-$/,'').replace(/\./g,'').replace(',','.');
+ return Number(s)||0;
+}
+function formatMoneyInput(v){
+ const digits=String(v||'').replace(/\D/g,'');
+ if(!digits)return '';
+ const n=parseInt(digits,10)||0;
+ return new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n)+'.-';
+}
+function fmt(n){return new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(Math.round(Number(n)||0))+'.-'}
+function calcLabor(){
+ const vals=[];let total=0;
+ if(laborMode==='bulk'){
+  const t={ka:0,bo:0,el:0,do:0,ca:0,me:0};let extraTotal=0;
+  bulkFields.forEach(([f])=>t[f]+=money(bulk[f]));
+  extraBulkLabor.forEach(r=>extraTotal+=money(r.amount));
+  const labels=['Kaporta','Boya','Elektrik','Döşeme','Cam','Mekanik','Ek İşçilik'];
+  const amounts=[t.ka,t.bo,t.el,t.do,t.ca,t.me,extraTotal];
+  labels.forEach((n,i)=>{document.getElementById('lab'+(i+1)).textContent=n;document.getElementById('t_'+(i+1)).textContent=fmt(amounts[i])});
+  total=amounts.reduce((a,b)=>a+b,0);
+ }else{
+  const t={st:0,on:0,bo:0,el:0,do:0,ca:0,me:0};
+  Object.values(piece).forEach(r=>pieceFields.forEach(([f])=>t[f]+=money(r[f])));
+  extraPieceLabor.forEach(r=>pieceFields.forEach(([f])=>t[f]+=money(r[f])));
+  const labels=['Sökme-Takma','Onarım','Boya','Elektrik','Döşeme','Cam','Mekanik'];
+  const amounts=[t.st,t.on,t.bo,t.el,t.do,t.ca,t.me];
+  labels.forEach((n,i)=>{document.getElementById('lab'+(i+1)).textContent=n;document.getElementById('t_'+(i+1)).textContent=fmt(amounts[i])});
+  total=amounts.reduce((a,b)=>a+b,0);
+ }
+ document.getElementById('laborTotal').textContent=fmt(total)+' TL';
+}
+
+async function shareReport(){
+  const plate=(document.getElementById('plakaNo').value||'').trim();
+  const owner=(document.getElementById('ruhsatSahibi').value||'').trim();
+  const company=(document.getElementById('sigortaSirketi').value||'').trim();
+  const title='Genç Sigorta Eksperlik Parça ve İşçilik Özeti'+(plate?' - '+plate:'');
+  const text=[company,plate,owner].filter(Boolean).join(' • ');
+
+  if(navigator.share){
+    try{
+      await navigator.share({title,text,url:location.href});
+      return;
+    }catch(e){
+      if(e && e.name==='AbortError')return;
+    }
+  }
+  alert('Bu tarayıcı doğrudan paylaşımı desteklemiyor. PDF KAYDET / YAZDIR ile PDF oluşturup paylaşabilirsiniz.');
+}
+
+
+function rptEsc(s){
+ return String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function pdfBaseName(){
+ const p=(document.getElementById('plakaNo')?.value||'').trim().toLocaleUpperCase('tr-TR');
+ return (p || 'PARCA_ISCILIK_OZETI').replace(/[\\/:*?"<>|]/g,'-').replace(/\s+/g,'_');
+}
+function rptMoney(n){
+ const v=Math.round(Number(n)||0);
+ return new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(v)+'.- TL';
+}
+function rptDate(){
+ const d=new Date();
+ return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+}
+function rptControlDate(v){
+ if(!v)return '-';
+ const p=String(v).split('-');
+ return p.length===3 ? p[2]+'.'+p[1]+'.'+p[0] : v;
+}
+function selectedKeysForReport(){
+ return Object.keys(selected).filter(k=>selected[k] && rows[k] && (rows[k].name||'').trim());
+}
+function namesByOperation(field){
+ const arr=[];
+ selectedKeysForReport().forEach(k=>{
+   const d=rows[k];
+   if(field==='repair' ? !!d.repair : field==='paint' ? !!d.paint : !!d[field]) arr.push((d.name||'').trim());
+ });
+ return arr;
+}
+function listHtml(arr){
+ return arr.length ? arr.map(x=>rptEsc(x)).join('<br>') : '<span class="rptEmpty">Yok</span>';
+}
+function pieceLaborTotals(){
+ const t={st:0,on:0,bo:0,el:0,do:0,ca:0,me:0};
+ Object.entries(piece).forEach(([k,p])=>{
+   if(!selected[k])return;
+   pieceFields.forEach(([f])=>t[f]+=money(p&&p[f]));
+ });
+ extraPieceLabor.forEach(r=>pieceFields.forEach(([f])=>t[f]+=money(r[f])));
+ return t;
+}
+function buildPieceLaborRows(){
+ const out=[];
+ selectedKeysForReport().forEach(k=>{
+   const d=rows[k], p=ensurePiece(k);
+   const nums=pieceFields.map(([f])=>money(p[f]));
+   const total=nums.reduce((a,b)=>a+b,0);
+   if(total<=0)return;
+   out.push({
+     name:d.name,
+     operation:opText(d),
+     vals:{st:nums[0],on:nums[1],bo:nums[2],el:nums[3],do:nums[4],ca:nums[5],me:nums[6]},
+     total
+   });
+ });
+ extraPieceLabor.forEach(r=>{
+   const vals={}; let total=0;
+   pieceFields.forEach(([f])=>{vals[f]=money(r[f]);total+=vals[f]});
+   if(total>0) out.push({name:r.name||'Ek İşçilik',operation:'Ek İşçilik',vals,total});
+ });
+ return out;
+}
+function buildBulkLaborRows(){
+ const rowsOut=[];
+ const map={ka:'Kaporta',bo:'Boya',el:'Elektrik',do:'Döşeme',ca:'Cam',me:'Mekanik'};
+ bulkFields.forEach(([f,n])=>{
+   const a=money(bulk[f]); if(a>0) rowsOut.push({name:n+' İşçiliği',operation:'Toplu İşçilik',amount:a});
+ });
+ extraBulkLabor.forEach(r=>{
+   const a=money(r.amount); if(a>0) rowsOut.push({name:r.name||'Ek İşçilik',operation:'Toplu İşçilik',amount:a});
+ });
+ return rowsOut;
+}
+function buildReport(){
+ const owner=(document.getElementById('ruhsatSahibi')?.value||'').trim()||'-';
+ const plate=(document.getElementById('plakaNo')?.value||'').trim().toLocaleUpperCase('tr-TR')||'-';
+ const company=(document.getElementById('sigortaSirketi')?.value||'').trim()||'-';
+ const controlDate=(document.getElementById('kontrolTarihi')?.value||'').trim();
+ const controlNotes=(document.getElementById('kontrolNotlari')?.value||'').trim();
+
+ const change=namesByOperation('degisim');
+ const repair=namesByOperation('repair');
+ const st=namesByOperation('sokTak');
+ const paint=namesByOperation('paint');
+ const mo=namesByOperation('mo');
+ const control=namesByOperation('kontrol');
+
+ let laborBody='', totalBoxes='', grand=0;
+ if(laborMode==='piece'){
+   const lr=buildPieceLaborRows();
+   const totals=pieceLaborTotals();
+   grand=Object.values(totals).reduce((a,b)=>a+b,0);
+
+   if(lr.length){
+     laborBody=lr.map(r=>`<tr>
+       <td><b>${rptEsc(r.name)}</b></td>
+       <td>${rptEsc(r.operation)}</td>
+       <td class="num">${r.vals.st?rptMoney(r.vals.st):'-'}</td>
+       <td class="num">${r.vals.on?rptMoney(r.vals.on):'-'}</td>
+       <td class="num">${r.vals.bo?rptMoney(r.vals.bo):'-'}</td>
+       <td class="num">${r.vals.el?rptMoney(r.vals.el):'-'}</td>
+       <td class="num">${r.vals.do?rptMoney(r.vals.do):'-'}</td>
+       <td class="num">${r.vals.ca?rptMoney(r.vals.ca):'-'}</td>
+       <td class="num">${r.vals.me?rptMoney(r.vals.me):'-'}</td>
+       <td class="num totalCell">${rptMoney(r.total)}</td>
+     </tr>`).join('');
+   }else{
+     laborBody='<tr><td colspan="10" class="rptEmpty">İşçilik tutarı girilmemiştir.</td></tr>';
+   }
+
+   const boxData=[
+     ['SÖKME-TAKMA',totals.st],['ONARIM',totals.on],['BOYA',totals.bo],['ELEKTRİK',totals.el],
+     ['DÖŞEME',totals.do],['CAM',totals.ca],['MEKANİK',totals.me],['GENEL TOPLAM',grand]
+   ];
+   totalBoxes=boxData.map(([n,v],i)=>`<div class="rptTotalBox ${i===7?'general':''}">
+     <div class="rptTotalLabel">${n}</div><div class="rptTotalValue">${rptMoney(v)}</div>
+   </div>`).join('');
+ }else{
+   const br=buildBulkLaborRows();
+   let totals={ka:0,bo:0,el:0,do:0,ca:0,me:0,extra:0};
+   bulkFields.forEach(([f])=>totals[f]=money(bulk[f]));
+   extraBulkLabor.forEach(r=>totals.extra+=money(r.amount));
+   grand=Object.values(totals).reduce((a,b)=>a+b,0);
+
+   laborBody=br.length ? br.map(r=>`<tr>
+     <td><b>${rptEsc(r.name)}</b></td><td>${rptEsc(r.operation)}</td>
+     <td class="num" colspan="7">-</td><td class="num totalCell">${rptMoney(r.amount)}</td>
+   </tr>`).join('') : '<tr><td colspan="10" class="rptEmpty">İşçilik tutarı girilmemiştir.</td></tr>';
+
+   const boxData=[
+     ['KAPORTA',totals.ka],['BOYA',totals.bo],['ELEKTRİK',totals.el],['DÖŞEME',totals.do],
+     ['CAM',totals.ca],['MEKANİK',totals.me],['EK İŞÇİLİK',totals.extra],['GENEL TOPLAM',grand]
+   ];
+   totalBoxes=boxData.map(([n,v],i)=>`<div class="rptTotalBox ${i===7?'general':''}">
+     <div class="rptTotalLabel">${n}</div><div class="rptTotalValue">${rptMoney(v)}</div>
+   </div>`).join('');
+ }
+
+ const sheet=document.getElementById('reportSheet');
+ sheet.innerHTML=`
+  <div class="rptBanner">
+   <div class="rptCompany">GENÇ SİGORTA EKSPERLİK</div>
+   <div class="rptSubtitle">PARÇA VE İŞÇİLİK ÖZETİ</div>
+  </div>
+  <div class="rptInfo">
+   <div class="rptInfoBox"><div class="rptInfoLabel">RUHSAT SAHİBİ</div><div class="rptInfoValue">${rptEsc(owner)}</div></div>
+   <div class="rptInfoBox plate"><div class="rptInfoLabel">PLAKA</div><div class="rptInfoValue">${rptEsc(plate)}</div></div>
+   <div class="rptInfoBox"><div class="rptInfoLabel">SİGORTA ŞİRKETİ</div><div class="rptInfoValue">${rptEsc(company)}</div></div>
+  </div>
+
+  <div class="rptSectionTitle">PARÇA / İŞLEM ÖZETİ</div>
+  <table class="rptTable rptSummaryTable">
+   <thead><tr>
+    <th>DEĞİŞEN PARÇALAR</th><th>ONARILAN PARÇALAR</th><th>SÖKÜLEN / TAKILAN</th>
+    <th>BOYANAN PARÇALAR</th><th>MOBİL ONARIM</th><th>KONTROL</th>
+   </tr></thead>
+   <tbody><tr>
+    <td class="change">${listHtml(change)}</td>
+    <td class="repair">${listHtml(repair)}</td>
+    <td class="st">${listHtml(st)}</td>
+    <td class="paint">${listHtml(paint)}</td>
+    <td class="center">${listHtml(mo)}</td>
+    <td class="center">${listHtml(control)}</td>
+   </tr></tbody>
+  </table>
+
+  <div class="rptSectionTitle">İŞÇİLİKLER</div>
+  <table class="rptTable rptLaborTable">
+   <thead><tr>
+    <th style="width:16%">PARÇA / İŞÇİLİK</th>
+    <th style="width:17%">TESPİT / İŞLEM</th>
+    <th>SÖKME-T.</th><th>ONARIM</th><th>BOYA</th><th>ELEKTRİK</th>
+    <th>DÖŞEME</th><th>CAM</th><th>MEKANİK</th><th style="width:10%">TOPLAM</th>
+   </tr></thead>
+   <tbody>${laborBody}</tbody>
+  </table>
+
+  <div class="rptTotals">${totalBoxes}</div>
+
+  <div class="rptSectionTitle">KONTROL BİLGİLERİ</div>
+  <div class="rptControlBox">
+   <div class="rptControlDate"><b>KONTROL TARİHİ</b><br><br>${rptEsc(rptControlDate(controlDate))}</div>
+   <div class="rptControlNotes"><b>KONTROL NOTLARI</b><br><br>${controlNotes?rptEsc(controlNotes):'<span class="rptEmpty">Kontrol notu girilmemiştir.</span>'}</div>
+  </div>
+
+  <div class="rptFooter">
+   <div><b>RAPOR TARİHİ:</b> ${rptDate()}</div>
+   <div><b>RAPORU HAZIRLAYAN:</b> GENÇ SİGORTA EKSPERLİK</div>
+   <div><b>SAYFA:</b> 1 / 1</div>
+  </div>`;
+ return sheet;
+}
+function previewReport(){
+ buildReport();
+ const m=document.getElementById('reportModal');
+ m.classList.add('show'); m.setAttribute('aria-hidden','false');
+ document.body.style.overflow='hidden';
+}
+function closeReport(){
+ const m=document.getElementById('reportModal');
+ m.classList.remove('show'); m.setAttribute('aria-hidden','true');
+ document.body.style.overflow='';
+}
+function printReport(){
+ buildReport();
+ const oldTitle=document.title;
+ const base=pdfBaseName();
+ document.title=base;
+ document.getElementById('reportModal').classList.add('show');
+ document.body.classList.add('report-printing');
+ const clean=()=>{
+   document.body.classList.remove('report-printing');
+   document.title=oldTitle;
+ };
+ window.addEventListener('afterprint',clean,{once:true});
+ setTimeout(()=>window.print(),60);
+ setTimeout(()=>{ if(document.body.classList.contains('report-printing')) clean(); },5000);
+}
+async function reportPdfBlob(){
+ const sheet=buildReport();
+ if(!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF){
+   throw new Error('PDF kitaplığı yüklenemedi.');
+ }
+ const canvas=await html2canvas(sheet,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+ const {jsPDF}=window.jspdf;
+ const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+ const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight();
+ const img=canvas.toDataURL('image/jpeg',0.95);
+ const ratio=Math.min(pw/canvas.width,ph/canvas.height);
+ const w=canvas.width*ratio,h=canvas.height*ratio;
+ pdf.addImage(img,'JPEG',(pw-w)/2,(ph-h)/2,w,h,undefined,'FAST');
+ return pdf.output('blob');
+}
+async function shareReport(){
+ try{
+   const blob=await reportPdfBlob();
+   const filename=pdfBaseName()+'.pdf';
+   const file=new File([blob],filename,{type:'application/pdf'});
+   if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+     await navigator.share({files:[file],title:pdfBaseName(),text:'Genç Sigorta Eksperlik Parça ve İşçilik Özeti'});
+     return;
+   }
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),3000);
+   alert('PDF '+filename+' adıyla indirildi. Cihazınız dosya paylaşımını doğrudan desteklemediği için indirilen PDF’yi paylaşabilirsiniz.');
+ }catch(e){
+   alert('PDF paylaşımı hazırlanamadı: '+(e&&e.message?e.message:e));
+ }
+}
+
+function cloneData(v){return JSON.parse(JSON.stringify(v))}
+function replaceObject(target,source){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,source||{})}
+function getSavedRecords(){
+ try{const x=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return Array.isArray(x)?x:[]}catch(e){return []}
+}
+function setSavedRecords(list){localStorage.setItem(STORAGE_KEY,JSON.stringify(list))}
+function collectFileData(){
+ return {
+  owner:(document.getElementById('ruhsatSahibi').value||'').trim(),
+  plate:(document.getElementById('plakaNo').value||'').trim(),
+  company:(document.getElementById('sigortaSirketi').value||'').trim(),
+  controlDate:(document.getElementById('kontrolTarihi').value||'').trim(),
+  controlNotes:(document.getElementById('kontrolNotlari').value||'').trim(),
+  activeMain,activeSub,laborMode,otherDirectSeq,
+  selected:cloneData(selected),rows:cloneData(rows),customBySub:cloneData(customBySub),piece:cloneData(piece),
+  bulk:cloneData(bulk),extraBulkLabor:cloneData(extraBulkLabor),extraPieceLabor:cloneData(extraPieceLabor),otherDirectRows:cloneData(otherDirectRows)
+ };
+}
+function saveFile(){
+ const data=collectFileData();
+ if(!data.owner && !data.plate && !data.company && !data.controlDate && !data.controlNotes && Object.keys(data.selected).length===0){alert('Kaydedilecek bir giriş bulunmuyor.');return}
+ try{
+  const list=getSavedRecords();
+  const now=new Date().toISOString();
+  if(!currentRecordId) currentRecordId='rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  const rec={id:currentRecordId,updatedAt:now,data};
+  const i=list.findIndex(x=>x.id===currentRecordId);
+  if(i>=0) list[i]=rec; else list.push(rec);
+  setSavedRecords(list);
+  alert('Dosya kaydedildi'+(data.plate?' — '+data.plate:'')+'.');
+ }catch(e){alert('Dosya kaydedilemedi. Tarayıcı kayıt alanına erişilemiyor.');}
+}
+function clearWorkingData(){
+ replaceObject(selected,{});replaceObject(rows,{});replaceObject(piece,{});replaceObject(customBySub,{});
+ bulkFields.forEach(([f])=>bulk[f]='');extraBulkLabor.length=0;extraPieceLabor.length=0;otherDirectRows.length=0;otherDirectSeq=0;
+ activeMain=mainNames[0];activeSub=Object.keys(regionalDamageData[activeMain])[0];laborMode='bulk';
+ document.getElementById('ruhsatSahibi').value='';document.getElementById('plakaNo').value='';document.getElementById('sigortaSirketi').value='';
+ document.getElementById('kontrolTarihi').value='';document.getElementById('kontrolNotlari').value='';
+ currentRecordId=null;
+ setLaborMode('bulk');renderAll();
+}
+function newFile(){
+ const d=collectFileData();
+ const hasData=d.owner||d.plate||d.company||d.controlDate||d.controlNotes||Object.keys(d.selected).length||extraBulkLabor.length||extraPieceLabor.length;
+ if(hasData && !confirm('Yeni dosya açılsın mı? Kaydedilmemiş girişler silinecektir.'))return;
+ clearWorkingData();
+}
+function restoreFile(rec){
+ const d=rec&&rec.data;if(!d)return;
+ document.getElementById('ruhsatSahibi').value=d.owner||'';document.getElementById('plakaNo').value=d.plate||'';document.getElementById('sigortaSirketi').value=d.company||'';
+ document.getElementById('kontrolTarihi').value=d.controlDate||'';document.getElementById('kontrolNotlari').value=d.controlNotes||'';
+ replaceObject(selected,d.selected);replaceObject(rows,d.rows);replaceObject(customBySub,d.customBySub);replaceObject(piece,d.piece);replaceObject(bulk,d.bulk);
+ extraBulkLabor.length=0;(d.extraBulkLabor||[]).forEach(x=>extraBulkLabor.push(x));
+ extraPieceLabor.length=0;(d.extraPieceLabor||[]).forEach(x=>extraPieceLabor.push(x));
+ otherDirectRows.length=0;(d.otherDirectRows||[]).forEach(x=>otherDirectRows.push(x));
+ otherDirectSeq=Number(d.otherDirectSeq)||0;activeMain=d.activeMain&&regionalDamageData[d.activeMain]?d.activeMain:mainNames[0];
+ activeSub=d.activeSub&&regionalDamageData[activeMain]&&regionalDamageData[activeMain][d.activeSub]?d.activeSub:Object.keys(regionalDamageData[activeMain])[0];
+ currentRecordId=rec.id;laborMode=d.laborMode==='piece'?'piece':'bulk';
+ setLaborMode(laborMode);renderAll();closeSavedFiles();
+}
+function openSavedFile(id){const rec=getSavedRecords().find(x=>x.id===id);if(rec)restoreFile(rec)}
+function deleteSavedFile(id){
+ const list=getSavedRecords(),rec=list.find(x=>x.id===id);const plate=rec&&rec.data&&rec.data.plate?(' '+rec.data.plate):'';
+ if(!confirm('Kayıtlı dosya'+plate+' silinsin mi?'))return;
+ try{setSavedRecords(list.filter(x=>x.id!==id));if(currentRecordId===id)currentRecordId=null;renderSavedFiles()}catch(e){alert('Kayıt silinemedi.');}
+}
+function savedDate(iso){try{return new Date(iso).toLocaleString('tr-TR')}catch(e){return ''}}
+function renderSavedFiles(){
+ const body=document.getElementById('savedFilesBody');const list=getSavedRecords().sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+ if(!list.length){body.innerHTML='<div class="savedEmpty">Henüz kayıtlı dosya bulunmuyor.</div>';return}
+ body.innerHTML='<div class="scroll"><table class="savedTable"><thead><tr><th>PLAKA</th><th>RUHSAT SAHİBİ</th><th>SİGORTA ŞİRKETİ</th><th>SON KAYIT</th><th>İŞLEM</th></tr></thead><tbody>'+list.map(r=>{
+  const d=r.data||{};return `<tr><td><b>${esc(d.plate||'-')}</b></td><td>${esc(d.owner||'-')}</td><td>${esc(d.company||'-')}</td><td>${esc(savedDate(r.updatedAt))}</td><td><div class="savedActions"><button class="openBtn" onclick="openSavedFile('${r.id}')">AÇ</button><button class="delBtn" onclick="deleteSavedFile('${r.id}')">SİL</button></div></td></tr>`
+ }).join('')+'</tbody></table></div>';
+}
+function showSavedFiles(){renderSavedFiles();const m=document.getElementById('savedFilesModal');m.classList.add('show');m.setAttribute('aria-hidden','false')}
+function closeSavedFiles(){const m=document.getElementById('savedFilesModal');m.classList.remove('show');m.setAttribute('aria-hidden','true')}
+
+function renderAll(full=true){renderTabs();renderPicker();renderPartTable();renderLabor()}
+function resetAll(){newFile()}
+renderAll();
+</script>
+</body>
+</html>
